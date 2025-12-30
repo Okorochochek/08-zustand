@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useNoteStore } from '@/lib/store/noteStore';
 import { createNote } from '@/lib/api';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NoteTag } from '@/types/note';
 import css from './NoteForm.module.css';
 
@@ -16,10 +17,20 @@ const TagOptions: NoteTag[] = [
 
 export default function NoteForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { draft, setDraft, clearDraft } = useNoteStore();
 
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      clearDraft();
+      router.back();
+    },
+  });
+
   const handleSubmit = async (formData: FormData) => {
-    await createNote({
+    await mutation.mutateAsync({
       title: formData.get('title') as string,
       content: formData.get('content') as string,
       tag: formData.get('tag') as NoteTag,

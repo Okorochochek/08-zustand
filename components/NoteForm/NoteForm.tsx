@@ -35,9 +35,6 @@ export default function NoteForm() {
       content: formData.get('content') as string,
       tag: formData.get('tag') as NoteTag,
     });
-
-    clearDraft();
-    router.back();
   };
 
   return (
